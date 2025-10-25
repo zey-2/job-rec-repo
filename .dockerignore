@@ -1,0 +1,25 @@
+# Exclude local files and secrets from Docker build context
+# Git
+.git
+.gitignore
+# Environments / secrets
+.env
+*.env
+.env.*
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+# Node (not used, but keep image clean)
+node_modules/
+# Logs
+*.log

@@ -37,9 +37,26 @@ cd Vertex_Build_Job
 4. Create credentials (API Key)
 5. Copy your API key
 
-**Setting the API Key in Browser:**
+**Setting the API Key:**
 
-Since this is a browser-based application, set your API key in the browser's localStorage:
+Create a `.env` file in the project root directory:
+
+```bash
+# Copy the example file
+cp .env.example .env
+```
+
+Then edit `.env` and replace the placeholder with your actual API key:
+
+```
+GEMINI_API_KEY=your-actual-api-key-here
+```
+
+**Note:** The `.env` file is already in `.gitignore` to prevent accidentally committing your API key to version control.
+
+**Alternative (Browser-only):**
+
+If you prefer, you can still set the API key in the browser's localStorage:
 
 1. Open the application in your browser (`http://localhost:8000`)
 2. Press `F12` to open Developer Tools
@@ -52,34 +69,67 @@ localStorage.setItem("GEMINI_API_KEY", "your-actual-api-key-here");
 
 5. Refresh the page (`F5`)
 
-The API key will be stored in your browser and persist across sessions.
-
 ### 3. Run the Application
 
-Since this project uses CDN imports and runs directly in the browser, you can serve it using any static file server:
-
-#### Option A: Using Python (if installed)
+Start the Python server:
 
 ```bash
-python server.py 8000
+python server.py
 ```
 
-**Note:** We use a custom server script (`server.py`) instead of Python's built-in `http.server` because ES6 modules require the correct MIME type (`application/javascript`), which the built-in server doesn't provide.
-
-#### Option B: Using Node.js (if installed)
+The server will start on port 8000 by default. You can specify a different port:
 
 ```bash
-npx serve .
+python server.py 3000
 ```
 
-#### Option C: Using VS Code Live Server Extension
+**Note:** We use a custom server script (`server.py`) that properly handles ES6 modules and automatically injects your API key from the `.env` file.
 
-1. Install the "Live Server" extension in VS Code
-2. Right-click on `index.html` and select "Open with Live Server"
+#### Deploy to Google Cloud Run (optional)
 
-#### Option D: Direct File Opening
+You can deploy this app as a serverless container on Google Cloud Run.
 
-Simply open `index.html` in your web browser. Note: Some browsers may restrict direct file access to APIs.
+Prerequisites:
+
+- Google Cloud project with billing enabled
+- Google Cloud SDK installed and authenticated (`gcloud init`)
+- Artifact Registry API and Cloud Run API enabled
+
+Build and push the container image (uses the provided `Dockerfile`):
+
+```powershell
+# Set variables (edit the REGION and REPO to your preference)
+$PROJECT_ID = (gcloud config get-value project)
+$REGION = "us-central1"
+$REPO = "job-rec-repo"
+
+# Create Artifact Registry repository (one-time)
+gcloud artifacts repositories create $REPO --repository-format=docker --location=$REGION --description="Images for AI Job Recommender" 2>$null
+
+# Build and push image with Cloud Build
+gcloud builds submit --tag "$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/ai-job-recommender:latest"
+```
+
+Deploy to Cloud Run and set the API key:
+
+```powershell
+# Deploy (publicly accessible)
+gcloud run deploy ai-job-recommender `
+   --image "$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/ai-job-recommender:latest" `
+   --platform managed `
+   --region $REGION `
+   --allow-unauthenticated `
+   --set-env-vars GEMINI_API_KEY="your-actual-api-key-here"
+
+# Get the service URL
+gcloud run services describe ai-job-recommender --region $REGION --format='value(status.url)'
+```
+
+Notes:
+
+- The server reads the Cloud Run `$PORT` environment variable automatically (no extra configuration needed).
+- For better security, store the API key in Secret Manager and mount or inject it at deploy time instead of using `--set-env-vars`.
+- To update, rebuild and redeploy the image; Cloud Run will roll traffic automatically.
 
 ### 4. Access the Application
 
@@ -126,31 +176,13 @@ Open your browser and navigate to:
 
 ## Development
 
-This project uses a CDN-based approach with minimal build requirements:
+### Project Structure
 
-- Dependencies loaded via ESM.sh CDN
-- TypeScript source files bundled with esbuild
-- Simple static file serving for development
+This project uses a CDN-based approach with no build system required:
 
-### Rebuilding the Bundle
-
-If you modify the TypeScript source files, rebuild the bundle:
-
-**Using the build script (recommended):**
-
-```bash
-# Windows PowerShell
-.\build.ps1
-
-# Linux/Mac
-./build.sh
-```
-
-**Or manually with esbuild:**
-
-```bash
-npx esbuild index.tsx --bundle --format=esm --outfile=index.js --external:react --external:react-dom/client --external:@google/genai --external:lucide-react --jsx=automatic
-```
+- Dependencies loaded via ESM.sh CDN (React, Tailwind, etc.)
+- All code runs directly in the browser
+- Simple Python server for development
 
 ### Adding New Features
 
@@ -158,6 +190,7 @@ npx esbuild index.tsx --bundle --format=esm --outfile=index.js --external:react 
 2. Modify AI prompt and schema in `services/geminiService.ts`
 3. Add UI components following existing patterns
 4. Test with sample resume data
+5. Refresh browser to see changes
 
 ## Contributing
 
@@ -179,7 +212,8 @@ Educational project - see footer attribution in the application.
 
 **"Missing API key" error**
 
-- Open browser console (`F12`) and run: `localStorage.setItem('GEMINI_API_KEY', 'your-key-here');`
+- Make sure you've created a `.env` file with your `GEMINI_API_KEY`
+- Or open browser console (`F12`) and run: `localStorage.setItem('GEMINI_API_KEY', 'your-key-here');`
 - Then refresh the page
 
 **"Failed to analyze profile"**
