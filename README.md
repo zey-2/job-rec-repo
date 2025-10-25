@@ -98,6 +98,9 @@ Prerequisites:
 Build and push the container image (uses the provided `Dockerfile`):
 
 ```powershell
+# Enable required APIs
+gcloud services enable cloudbuild.googleapis.com artifactregistry.googleapis.com
+
 # Set variables (edit the REGION and REPO to your preference)
 $PROJECT_ID = (gcloud config get-value project)
 $REGION = "us-central1"
