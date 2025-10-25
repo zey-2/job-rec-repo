@@ -27,14 +27,7 @@ git clone <repository-url>
 cd Vertex_Build_Job
 ```
 
-### 2. Configure Environment Variables
-
-Create a `.env` file in the root directory (or set environment variables in your system):
-
-```bash
-# Required: Google Vertex AI API Key
-API_KEY=your_google_vertex_ai_api_key_here
-```
+### 2. Configure API Key
 
 **Getting a Google Vertex AI API Key:**
 
@@ -42,7 +35,24 @@ API_KEY=your_google_vertex_ai_api_key_here
 2. Create a new project or select an existing one
 3. Enable the Vertex AI API
 4. Create credentials (API Key)
-5. Copy the API key to your `.env` file
+5. Copy your API key
+
+**Setting the API Key in Browser:**
+
+Since this is a browser-based application, set your API key in the browser's localStorage:
+
+1. Open the application in your browser (`http://localhost:8000`)
+2. Press `F12` to open Developer Tools
+3. Go to the **Console** tab
+4. Run this command (replace with your actual API key):
+
+```javascript
+localStorage.setItem("GEMINI_API_KEY", "your-actual-api-key-here");
+```
+
+5. Refresh the page (`F5`)
+
+The API key will be stored in your browser and persist across sessions.
 
 ### 3. Run the Application
 
@@ -51,8 +61,10 @@ Since this project uses CDN imports and runs directly in the browser, you can se
 #### Option A: Using Python (if installed)
 
 ```bash
-python -m http.server 8000
+python server.py 8000
 ```
+
+**Note:** We use a custom server script (`server.py`) instead of Python's built-in `http.server` because ES6 modules require the correct MIME type (`application/javascript`), which the built-in server doesn't provide.
 
 #### Option B: Using Node.js (if installed)
 
@@ -114,12 +126,31 @@ Open your browser and navigate to:
 
 ## Development
 
-This project uses a unique CDN-based approach with no build system:
+This project uses a CDN-based approach with minimal build requirements:
 
 - Dependencies loaded via ESM.sh CDN
-- TypeScript compiled in-browser
-- No package.json or build configuration needed
-- Direct file serving for development
+- TypeScript source files bundled with esbuild
+- Simple static file serving for development
+
+### Rebuilding the Bundle
+
+If you modify the TypeScript source files, rebuild the bundle:
+
+**Using the build script (recommended):**
+
+```bash
+# Windows PowerShell
+.\build.ps1
+
+# Linux/Mac
+./build.sh
+```
+
+**Or manually with esbuild:**
+
+```bash
+npx esbuild index.tsx --bundle --format=esm --outfile=index.js --external:react --external:react-dom/client --external:@google/genai --external:lucide-react --jsx=automatic
+```
 
 ### Adding New Features
 
@@ -146,10 +177,10 @@ Educational project - see footer attribution in the application.
 
 ### Common Issues
 
-**"API_KEY environment variable not set"**
+**"Missing API key" error**
 
-- Ensure your `.env` file exists and contains `API_KEY=your_key_here`
-- If running from file system, set the environment variable in your system settings
+- Open browser console (`F12`) and run: `localStorage.setItem('GEMINI_API_KEY', 'your-key-here');`
+- Then refresh the page
 
 **"Failed to analyze profile"**
 

@@ -1,2 +1,27 @@
+# Environment variables
 .env
+
+# GitHub workflows (if not needed in repo)
 .github/
+
+# Temporary files
+test.html
+debug.html
+*-old.js
+*-backup.*
+
+# Build artifacts
+.vite/
+node_modules/
+dist/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
