@@ -177,6 +177,8 @@ Open your browser and navigate to:
 3. AI returns JSON with job recommendations, skills analysis, and upskilling suggestions
 4. Results rendered in responsive UI components
 
+**Note:** The AI prompts reside in `services/geminiService.ts`.
+
 ## Development
 
 ### Project Structure
