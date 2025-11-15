@@ -2,6 +2,8 @@
 
 An AI-driven system that analyzes user profiles to recommend optimal job roles, identifies skill gaps for each role, and suggests personalized upskilling paths using Google Gemini AI.
 
+> **📝 Generation Prompt Available**: Want to recreate this app or understand how it was built? See [GENERATION_PROMPT.md](./GENERATION_PROMPT.md) for a comprehensive prompt that can be used to regenerate this entire application.
+
 ## Features
 
 - **AI-Powered Analysis**: Uses Google Gemini 2.5-flash to analyze resumes and profiles
